@@ -1,0 +1,454 @@
+:root {
+    --bg-top: #0f172a;
+    --bg-bottom: #1e3a8a;
+    --ocean-top: #2563eb;
+    --ocean-bottom: #1d4ed8;
+    --wave-hue: 220;
+    /* base hue for blue */
+
+    --wave-base-y: 10%;
+    /* controls wave rise/fall for breathing */
+    --wave-speed: 5s;
+    /* base speed for horizontal parallax */
+    --wave-scale: 1;
+    /* for breathing swell */
+
+    --text-glow-colors: rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+    font-family: 'Outfit', sans-serif;
+    overflow: hidden;
+    /* no scrolling */
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    color: #fff;
+    transition: background 2s ease;
+}
+
+#app {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Scenery */
+.sky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    z-index: 1;
+}
+
+.sun-moon {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    z-index: 2;
+    animation: pulse 8s infinite alternate ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: translateX(-50%) scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateX(-50%) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Ocean Base */
+#ocean-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40%;
+    z-index: 3;
+    transition: height 3s ease-in-out;
+}
+
+/* When Breathing, waves rise */
+.breathing-mode #ocean-container {
+    /* controlled by js varying var(--wave-base-y) */
+    transform: translateY(var(--wave-base-y)) scaleY(var(--wave-scale));
+    transform-origin: bottom center;
+    transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Realistic Photo Water Waves */
+.realistic-water {
+    position: absolute;
+    top: -50px;
+    left: -50%;
+    width: 200%;
+    height: calc(100% + 50px);
+    background-size: cover;
+    background-position: center bottom;
+    opacity: 0.85;
+    mix-blend-mode: hard-light;
+    animation: pan-water 40s ease-in-out infinite alternate;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 15%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 15%);
+}
+
+.layer-1 {
+    animation-duration: 35s;
+    opacity: 1;
+}
+
+.layer-2 {
+    animation: pan-water-reverse 45s ease-in-out infinite alternate;
+    background-position: center center;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+}
+
+@keyframes pan-water {
+    0% {
+        transform: translateX(0) scale(1.05);
+    }
+
+    100% {
+        transform: translateX(10%) scale(1.1);
+    }
+}
+
+@keyframes pan-water-reverse {
+    0% {
+        transform: translateX(10%) scale(1.1);
+    }
+
+    100% {
+        transform: translateX(0) scale(1.05);
+    }
+}
+
+.ocean-bg {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(6, 56, 94, 1) 0%, rgba(2, 18, 33, 1) 100%);
+    z-index: -1;
+}
+
+/* UI Layer */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    /* Let clicks pass unless explicitly setting pointer-events */
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.5s ease, visibility 1.5s;
+    pointer-events: auto;
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.glow-text {
+    font-size: 3.5rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px var(--text-glow-colors);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.text-small {
+    font-size: 2rem;
+}
+
+#breathe-text {
+    transition: opacity 1s, text-shadow 2s, transform 3s ease-out;
+}
+
+/* Timer */
+.timer-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 30px 0;
+}
+
+/* Buttons */
+.glass-btn {
+    padding: 12px 28px;
+    font-size: 1.1rem;
+    font-family: inherit;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 30px;
+    cursor: pointer;
+    transition: transform 0.3s, background 0.3s;
+    font-weight: 400;
+    pointer-events: auto;
+}
+
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.small-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-top: 40px;
+}
+
+.small-btn:hover {
+    opacity: 1;
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s;
+    z-index: 50;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+}
+
+.modal.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.glass-panel {
+    background: rgba(20, 30, 60, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+    text-align: center;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal.active .glass-panel {
+    transform: translateY(0);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+.modal h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: 400;
+}
+
+.bottle-message {
+    font-size: 1.25rem;
+    font-style: italic;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    color: #f1f5f9;
+}
+
+.bottle-author {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    font-weight: 300;
+}
+
+textarea,
+input[type="text"] {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    color: white;
+    font-family: inherit;
+    margin-bottom: 15px;
+    outline: none;
+    resize: none;
+}
+
+textarea:focus,
+input[type="text"]:focus {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+#toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    animation: fadeout 3s forwards;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeout {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+
+/* Bottles in ocean */
+#bottles-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    /* Above ocean, below UI */
+    pointer-events: none;
+}
+
+.bottle {
+    position: absolute;
+    width: 24px;
+    height: 64px;
+    cursor: pointer;
+    pointer-events: auto;
+    /* initial float animation */
+    animation: bottle-bob 4s infinite ease-in-out alternate;
+    transition: transform 0.3s;
+    transform-origin: bottom center;
+}
+
+.bottle:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.bottle svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+}
+
+@keyframes bottle-bob {
+    0% {
+        transform: translateY(0px) rotate(-10deg);
+    }
+
+    100% {
+        transform: translateY(-8px) rotate(10deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .glow-text {
+        font-size: 2.5rem;
+    }
+
+    .text-small {
+        font-size: 1.5rem;
+    }
+}

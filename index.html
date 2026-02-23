@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Breath - Guided Meditation</title>
+    <meta name="description"
+        content="A 60-second guided breathing experience driven by ocean waves, with a space to leave and discover messages in bottles.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <div class="sky"></div>
+        <div class="stars"></div>
+        <div class="sun-moon"></div>
+
+        <div id="ocean-container">
+            <!-- Layers of ocean for depth -->
+            <div class="ocean-bg"></div>
+
+            <div class="realistic-water layer-1"
+                style="background-image: url('https://images.unsplash.com/photo-1542226601-ca1df0df4447?q=80&w=2500&auto=format&fit=crop');">
+            </div>
+            <div class="realistic-water layer-2"
+                style="background-image: url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500&auto=format&fit=crop');">
+            </div>
+        </div>
+
+        <!-- Bottles will be dynamically injected here -->
+        <div id="bottles-container"></div>
+
+        <!-- UI Overlays -->
+        <div id="ui-layer">
+
+            <!-- Idle / Start Screen -->
+            <div id="start-screen" class="screen active">
+                <h1 class="glow-text">Ocean Breath</h1>
+                <p>A 60-second journey of relaxation.</p>
+                <button id="start-btn" class="glass-btn">Begin Journey</button>
+            </div>
+
+            <!-- Breathing Screen -->
+            <div id="breathe-screen" class="screen">
+                <h2 id="breathe-text" class="glow-text">Prepare to breathe...</h2>
+                <div class="timer-container">
+                    <div id="timer">60</div>
+                </div>
+                <button id="skip-btn" class="glass-btn small-btn">Skip to Messages</button>
+            </div>
+
+            <!-- Exploration Screen -->
+            <div id="explore-screen" class="screen">
+                <h2 class="glow-text text-small">The ocean is calm.<br>Find a bottle or leave your own.</h2>
+                <button id="throw-bottle-btn" class="glass-btn">Leave a Message</button>
+            </div>
+
+            <!-- Modals -->
+            <div id="read-modal" class="modal">
+                <div class="modal-content glass-panel">
+                    <button class="close-btn" data-target="read-modal">&times;</button>
+                    <div class="modal-body">
+                        <p id="read-message" class="bottle-message"></p>
+                        <span id="read-author" class="bottle-author"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="write-modal" class="modal">
+                <div class="modal-content glass-panel">
+                    <button class="close-btn" data-target="write-modal">&times;</button>
+                    <h2>Leave a message</h2>
+                    <textarea id="message-input" placeholder="What's on your mind?..." rows="4"
+                        maxlength="200"></textarea>
+                    <input type="text" id="name-input" placeholder="Your Name (optional)" maxlength="30">
+                    <button id="send-bottle-btn" class="glass-btn">Cast into the sea</button>
+                </div>
+            </div>
+
+            <!-- Toast Notifications -->
+            <div id="toast-container"></div>
+
+        </div>
+    </div>
+
+    <script src="app.js" type="module"></script>
+</body>
+
+</html>
